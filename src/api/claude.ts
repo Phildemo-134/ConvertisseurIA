@@ -1,90 +1,83 @@
-import { ApiResponse, ClaudeRequest, ClaudeResponse } from './types'
+import Anthropic from "@anthropic-ai/sdk";
+import { ApiResponse } from './types'
 
 export class ClaudeAPI {
-  private apiKey: string
+  private anthropic: Anthropic
   private model: string
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_CLAUDE_API_KEY
-    this.model = import.meta.env.VITE_CLAUDE_MODEL || 'claude-3-sonnet-20240229'
-  }
-
-  private validateConfig(): void {
-    if (!this.apiKey || this.apiKey === 'your_claude_api_key_here') {
+    const apiKey = import.meta.env.VITE_CLAUDE_API_KEY
+    if (!apiKey || apiKey === 'your_claude_api_key_here') {
       alert('Clé API Claude non configurée. Veuillez configurer VITE_CLAUDE_API_KEY dans le fichier .env')
     }
+    
+    this.anthropic = new Anthropic({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true
+    })
+    this.model = import.meta.env.VITE_CLAUDE_MODEL || 'claude-sonnet-4-20250514'
   }
 
   async remixContent(text: string): Promise<ApiResponse> {
-    this.validateConfig()
-    const requestBody: ClaudeRequest = {
-      model: this.model,
-      max_tokens: 1000,
-      messages: [
-        {
-          role: 'user',
-          content: `Remixe ce texte de manière professionnelle et engageante : ${text}`
-        }
-      ]
-    }
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify(requestBody)
+      const msg = await this.anthropic.messages.create({
+        model: this.model,
+        max_tokens: 1000,
+        temperature: 0.7,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `Remixe ce texte de manière professionnelle et engageante : ${text}`
+              }
+            ]
+          }
+        ]
       })
 
-      if (!response.ok) {
-        const errorData: ClaudeResponse = await response.json()
-        throw new Error(errorData.error?.message || 'Erreur API Claude')
+      // Accéder au contenu textuel de manière sûre
+      const textContent = msg.content.find(block => block.type === 'text')
+      if (!textContent || textContent.type !== 'text') {
+        throw new Error('Aucune réponse textuelle reçue de Claude')
       }
 
-      const data: ClaudeResponse = await response.json()
-      return { content: data.content[0].text }
+      return { content: textContent.text }
     } catch (error) {
       if (error instanceof Error) {
         throw error
       }
-     alert('Erreur inattendue lors de la communication avec Claude')
+      throw new Error('Erreur inattendue lors de la communication avec Claude')
     }
   }
 
   async summarizeContent(text: string): Promise<ApiResponse> {
-    this.validateConfig()
-
-    const requestBody: ClaudeRequest = {
-      model: this.model,
-      max_tokens: 500,
-      messages: [
-        {
-          role: 'user',
-          content: `Crée un résumé concis et structuré de ce texte : ${text}`
-        }
-      ]
-    }
-
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify(requestBody)
+      const msg = await this.anthropic.messages.create({
+        model: this.model,
+        max_tokens: 500,
+        temperature: 0.3,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `Crée un résumé concis et structuré de ce texte : ${text}`
+              }
+            ]
+          }
+        ]
       })
 
-      if (!response.ok) {
-        const errorData: ClaudeResponse = await response.json()
-        throw new Error(errorData.error?.message || 'Erreur API Claude')
+      // Accéder au contenu textuel de manière sûre
+      const textContent = msg.content.find(block => block.type === 'text')
+      if (!textContent || textContent.type !== 'text') {
+        throw new Error('Aucune réponse textuelle reçue de Claude')
       }
 
-      const data: ClaudeResponse = await response.json()
-      return { content: data.content[0].text }
+      return { content: textContent.text }
     } catch (error) {
       if (error instanceof Error) {
         throw error

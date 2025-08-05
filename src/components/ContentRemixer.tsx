@@ -3,7 +3,7 @@ import { APIFactory } from '../api'
 
 const ContentRemixer: React.FC = () => {
   const [inputText, setInputText] = useState<string>('')
-  const [outputText, setOutputText] = useState<string>('Résultat bla bla bla')
+  const [outputText, setOutputText] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [selectedApi, setSelectedApi] = useState<'openai' | 'claude'>('openai')

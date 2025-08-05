@@ -1,4 +1,3 @@
-import React from 'react'
 import ContentRemixer from './components/ContentRemixer'
 
 function App() {
