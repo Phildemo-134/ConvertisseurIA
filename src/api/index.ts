@@ -1,5 +1,6 @@
-export { OpenAIAPI } from './openai'
-export { ClaudeAPI } from './claude'
+import { OpenAIAPI } from './openai'
+import { ClaudeAPI } from './claude'
+
 export type { ApiResponse, ApiProvider } from './types'
 
 // Factory pour créer l'instance API appropriée

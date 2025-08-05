@@ -17,7 +17,6 @@ export class OpenAIAPI {
 
   async remixContent(text: string): Promise<ApiResponse> {
     this.validateConfig()
-
     const requestBody: OpenAIRequest = {
       model: this.model,
       messages: [
@@ -33,7 +32,6 @@ export class OpenAIAPI {
       max_tokens: 1000,
       temperature: 0.7
     }
-
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',

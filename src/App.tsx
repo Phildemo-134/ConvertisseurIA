@@ -14,7 +14,6 @@ function App() {
             Remixez, reformulez et améliorez vos textes en quelques clics.
           </p>
         </header>
-        
         <ContentRemixer />
       </div>
     </div>

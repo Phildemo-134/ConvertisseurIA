@@ -11,13 +11,12 @@ export class ClaudeAPI {
 
   private validateConfig(): void {
     if (!this.apiKey || this.apiKey === 'your_claude_api_key_here') {
-      throw new Error('Clé API Claude non configurée. Veuillez configurer VITE_CLAUDE_API_KEY dans le fichier .env')
+      alert('Clé API Claude non configurée. Veuillez configurer VITE_CLAUDE_API_KEY dans le fichier .env')
     }
   }
 
   async remixContent(text: string): Promise<ApiResponse> {
     this.validateConfig()
-
     const requestBody: ClaudeRequest = {
       model: this.model,
       max_tokens: 1000,
@@ -28,7 +27,6 @@ export class ClaudeAPI {
         }
       ]
     }
-
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -51,7 +49,7 @@ export class ClaudeAPI {
       if (error instanceof Error) {
         throw error
       }
-      throw new Error('Erreur inattendue lors de la communication avec Claude')
+     alert('Erreur inattendue lors de la communication avec Claude')
     }
   }
 
