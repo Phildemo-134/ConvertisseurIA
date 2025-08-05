@@ -6,7 +6,6 @@ const ContentRemixer: React.FC = () => {
   const [outputText, setOutputText] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
-  const [selectedApi, setSelectedApi] = useState<'openai' | 'claude'>('openai')
 
   const handleRemix = async () => {
     if (!inputText.trim()) {
@@ -17,7 +16,7 @@ const ContentRemixer: React.FC = () => {
     setError('')
 
     try {
-      const api = APIFactory.create(selectedApi)
+      const api = APIFactory.create()
       const result = await api.remixContent(inputText)
       setOutputText(result.content)
     } catch (err) {
@@ -26,8 +25,6 @@ const ContentRemixer: React.FC = () => {
       setIsLoading(false)
     }
   }
-
-
 
   const handleClear = () => {
     setInputText('')
@@ -46,47 +43,6 @@ const ContentRemixer: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Section Sélection API */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">
-          Sélection de l'API IA
-        </h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Choisissez votre API IA
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="api"
-                  value="openai"
-                  checked={selectedApi === 'openai'}
-                  onChange={(e) => setSelectedApi(e.target.value as 'openai' | 'claude')}
-                  className="mr-2"
-                />
-                <span className="text-sm text-slate-700">OpenAI (GPT-3.5)</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="api"
-                  value="claude"
-                  checked={selectedApi === 'claude'}
-                  onChange={(e) => setSelectedApi(e.target.value as 'openai' | 'claude')}
-                  className="mr-2"
-                />
-                <span className="text-sm text-slate-700">Claude (Anthropic)</span>
-              </label>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              Configurez vos clés API dans le fichier .env à la racine du projet.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Section d'entrée */}
         <div className="space-y-4">
@@ -119,7 +75,7 @@ const ContentRemixer: React.FC = () => {
                     Remixage en cours...
                   </>
                 ) : (
-                  'Remixer avec l\'IA'
+                  'Remixer avec Claude'
                 )}
               </button>
               <button

@@ -3,29 +3,6 @@ export interface ApiResponse {
   error?: string
 }
 
-export interface OpenAIMessage {
-  role: 'system' | 'user' | 'assistant'
-  content: string
-}
-
-export interface OpenAIRequest {
-  model: string
-  messages: OpenAIMessage[]
-  max_tokens: number
-  temperature: number
-}
-
-export interface OpenAIResponse {
-  choices: Array<{
-    message: {
-      content: string
-    }
-  }>
-  error?: {
-    message: string
-  }
-}
-
 export interface ClaudeMessage {
   role: 'user' | 'assistant'
   content: string
@@ -46,4 +23,4 @@ export interface ClaudeResponse {
   }
 }
 
-export type ApiProvider = 'openai' | 'claude' 
+export type ApiProvider = 'claude' 
