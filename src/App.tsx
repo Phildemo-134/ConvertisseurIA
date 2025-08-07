@@ -1,4 +1,5 @@
 import ContentRemixer from './components/ContentRemixer'
+import SavedTweets from './components/SavedTweets'
 
 function App() {
   return (
@@ -35,6 +36,11 @@ function App() {
           </div>
         </header>
         <ContentRemixer />
+        
+        {/* Section des tweets sauvegardés */}
+        <div className="mt-16">
+          <SavedTweets />
+        </div>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { APIFactory } from '../api'
-import { TweetsResponse } from '../api/types'
 import Notification from './Notification'
+import { supabase, SaveTweetData } from '../lib/supabase'
 
 const ContentRemixer: React.FC = () => {
   const [inputText, setInputText] = useState<string>('')
@@ -41,6 +41,33 @@ const ContentRemixer: React.FC = () => {
     setInputText('')
     setTweets([])
     setError('')
+  }
+
+  const saveTweet = async (tweetContent: string) => {
+    try {
+      const tweetData: SaveTweetData = {
+        content: tweetContent,
+        character_count: tweetContent.length
+      }
+
+      const { error } = await supabase
+        .from('saved_tweets')
+        .insert([tweetData])
+
+      if (error) throw error
+
+      setNotification({
+        message: 'Tweet sauvegardé avec succès !',
+        type: 'success',
+        isVisible: true
+      })
+    } catch (err) {
+      setNotification({
+        message: err instanceof Error ? err.message : 'Erreur lors de la sauvegarde',
+        type: 'error',
+        isVisible: true
+      })
+    }
   }
 
 
@@ -159,18 +186,29 @@ const ContentRemixer: React.FC = () => {
                               <p className="text-slate-800 leading-relaxed">{tweet}</p>
                               <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
                                 <span className="text-xs text-slate-500">{tweet.length}/200 caractères</span>
-                                <button
-                                  onClick={() => {
-                                    const encodedTweet = encodeURIComponent(tweet)
-                                    window.open(`https://twitter.com/intent/tweet?text=${encodedTweet}`, '_blank')
-                                  }}
-                                  className="flex items-center gap-2 text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
-                                >
-                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                                  </svg>
-                                  Publier
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => {
+                                      const encodedTweet = encodeURIComponent(tweet)
+                                      window.open(`https://twitter.com/intent/tweet?text=${encodedTweet}`, '_blank')
+                                    }}
+                                    className="flex items-center gap-2 text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                    </svg>
+                                    Publier
+                                  </button>
+                                  <button
+                                    onClick={() => saveTweet(tweet)}
+                                    className="flex items-center gap-2 text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                    Sauvegarder
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
