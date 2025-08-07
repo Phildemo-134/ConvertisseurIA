@@ -1,6 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiResponse } from './types'
 
+const prompt = `Tu es un expert en social media et ghostwriter. Tu travailles pour un blogueur célèbre. Ton travail consiste à prendre une publication
+de son blog et d'en faire plusieurs tweets pour partager les différentes idées de la publication. On te 
+donne une publication et tu dois créer 5 tweets à partir de cet article.
+Comme tu es ghostwriter tu dois préserver le ton et le style de la publication le plus possible.
+Rappelle toi qu'un tweet ne peut exceder 200 caractères.
+Retourne les tweets sous la forme d'une liste, chaque tweet étant sur une ligne.
+N'inclus pas de hastag ni d'emoji.
+Inclus au moins 5 tweets. 
+La publication est la suivante :`;
+
 export class ClaudeAPI {
   private anthropic: Anthropic
   private model: string
@@ -18,7 +28,8 @@ export class ClaudeAPI {
     this.model = import.meta.env.VITE_CLAUDE_MODEL || 'claude-sonnet-4-20250514'
   }
 
-  async remixContent(text: string): Promise<ApiResponse> {
+
+    async generateTweetsFromBlogPost(text: string): Promise<ApiResponse> {
     try {
       const msg = await this.anthropic.messages.create({
         model: this.model,
@@ -30,7 +41,7 @@ export class ClaudeAPI {
             content: [
               {
                 type: "text",
-                text: `Remixe ce texte de manière professionnelle et engageante : ${text}`
+                text: `${prompt}: ${text}`
               }
             ]
           }

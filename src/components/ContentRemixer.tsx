@@ -27,7 +27,7 @@ const ContentRemixer: React.FC = () => {
 
     try {
       const api = APIFactory.create()
-      const result = await api.remixContent(inputText)
+      const result = await api.generateTweetsFromBlogPost(inputText)
       setOutputText(result.content)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du remixage. Veuillez réessayer.')
