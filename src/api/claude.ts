@@ -1,15 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { ApiResponse } from './types'
-
-const prompt = `Tu es un expert en social media et ghostwriter. Tu travailles pour un blogueur célèbre. Ton travail consiste à prendre une publication
-de son blog et d'en faire plusieurs tweets pour partager les différentes idées de la publication. On te 
-donne une publication et tu dois créer 5 tweets à partir de cet article.
-Comme tu es ghostwriter tu dois préserver le ton et le style de la publication le plus possible.
-Rappelle toi qu'un tweet ne peut exceder 200 caractères.
-Retourne les tweets sous la forme d'une liste, chaque tweet étant sur une ligne.
-N'inclus pas de hastag ni d'emoji.
-Inclus au moins 5 tweets. 
-La publication est la suivante :`;
+import { ApiResponse, TweetsResponse } from './types'
+import { TWEET_GENERATION_PROMPT, SUMMARIZATION_PROMPT } from './prompts'
 
 export class ClaudeAPI {
   private anthropic: Anthropic
@@ -29,7 +20,7 @@ export class ClaudeAPI {
   }
 
 
-    async generateTweetsFromBlogPost(text: string): Promise<ApiResponse> {
+    async generateTweetsFromBlogPost(text: string): Promise<TweetsResponse> {
     try {
       const msg = await this.anthropic.messages.create({
         model: this.model,
@@ -41,7 +32,7 @@ export class ClaudeAPI {
             content: [
               {
                 type: "text",
-                text: `${prompt}: ${text}`
+                text: `${TWEET_GENERATION_PROMPT}: ${text}`
               }
             ]
           }
@@ -54,7 +45,18 @@ export class ClaudeAPI {
         throw new Error('Aucune réponse textuelle reçue de Claude')
       }
 
-      return { content: textContent.text }
+      // Parser la réponse JSON
+      try {
+        const parsedResponse = JSON.parse(textContent.text)
+        if (parsedResponse.tweets && Array.isArray(parsedResponse.tweets)) {
+          return { tweets: parsedResponse.tweets }
+        } else {
+          throw new Error('Format de réponse invalide')
+        }
+      } catch (parseError) {
+        // Si le parsing JSON échoue, on retourne une erreur
+        throw new Error('Réponse de Claude non parsable en JSON')
+      }
     } catch (error) {
       if (error instanceof Error) {
         throw error
@@ -75,7 +77,7 @@ export class ClaudeAPI {
             content: [
               {
                 type: "text",
-                text: `Crée un résumé concis et structuré de ce texte : ${text}`
+                text: `${SUMMARIZATION_PROMPT} ${text}`
               }
             ]
           }

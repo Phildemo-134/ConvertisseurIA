@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { APIFactory } from '../api'
+import { TweetsResponse } from '../api/types'
 import Notification from './Notification'
 
 const ContentRemixer: React.FC = () => {
   const [inputText, setInputText] = useState<string>('')
-  const [outputText, setOutputText] = useState<string>('')
+  const [tweets, setTweets] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [notification, setNotification] = useState<{
@@ -28,7 +29,7 @@ const ContentRemixer: React.FC = () => {
     try {
       const api = APIFactory.create()
       const result = await api.generateTweetsFromBlogPost(inputText)
-      setOutputText(result.content)
+      setTweets(result.tweets)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du remixage. Veuillez réessayer.')
     } finally {
@@ -38,26 +39,11 @@ const ContentRemixer: React.FC = () => {
 
   const handleClear = () => {
     setInputText('')
-    setOutputText('')
+    setTweets([])
     setError('')
   }
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(outputText)
-      setNotification({
-        message: 'Texte copié avec succès !',
-        type: 'success',
-        isVisible: true
-      })
-    } catch (err) {
-      setNotification({
-        message: 'Erreur lors de la copie',
-        type: 'error',
-        isVisible: true
-      })
-    }
-  }
+
 
   const closeNotification = () => {
     setNotification(prev => ({ ...prev, isVisible: false }))
@@ -145,9 +131,9 @@ const ContentRemixer: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-slate-800">
-                    Résultat
+                    Tweets générés
                   </h2>
-                  <p className="text-slate-500 text-sm">Contenu transformé par l'IA</p>
+                  <p className="text-slate-500 text-sm">5 tweets créés à partir de votre contenu</p>
                 </div>
               </div>
               
@@ -161,35 +147,49 @@ const ContentRemixer: React.FC = () => {
                       {error}
                     </div>
                   )}
-                  {outputText ? (
-                    <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">
-                      {outputText}
+                  {tweets.length > 0 ? (
+                    <div className="space-y-4">
+                      {tweets.map((tweet, index) => (
+                        <div key={index} className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-sm font-semibold">{index + 1}</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-slate-800 leading-relaxed">{tweet}</p>
+                              <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+                                <span className="text-xs text-slate-500">{tweet.length}/200 caractères</span>
+                                <button
+                                  onClick={() => {
+                                    const encodedTweet = encodeURIComponent(tweet)
+                                    window.open(`https://twitter.com/intent/tweet?text=${encodedTweet}`, '_blank')
+                                  }}
+                                  className="flex items-center gap-2 text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                  </svg>
+                                  Publier
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="text-slate-400 italic text-center py-20">
                       <svg className="w-12 h-12 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
-                      <p className="text-lg">Le contenu remixé apparaîtra ici...</p>
+                      <p className="text-lg">Vos tweets apparaîtront ici...</p>
                       <p className="text-sm mt-2">Cliquez sur "Remixer avec Claude" pour commencer</p>
                     </div>
                   )}
                 </div>
               </div>
               
-              {outputText && (
-                <div className="flex gap-4 mt-6">
-                  <button
-                    onClick={handleCopy}
-                    className="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 btn-modern"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Copier le résultat
-                  </button>
-                </div>
-              )}
+
             </div>
           </div>
         </div>

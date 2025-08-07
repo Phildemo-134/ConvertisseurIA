@@ -3,6 +3,11 @@ export interface ApiResponse {
   error?: string
 }
 
+export interface TweetsResponse {
+  tweets: string[]
+  error?: string
+}
+
 export interface ClaudeMessage {
   role: 'user' | 'assistant'
   content: string
